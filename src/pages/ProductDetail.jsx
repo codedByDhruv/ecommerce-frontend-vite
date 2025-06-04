@@ -16,27 +16,23 @@ const ProductDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const fetchProduct = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-      setProduct(res.data);
-    } catch (error) {
-      console.error("Failed to fetch product:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        setProduct(res.data);
+      } catch (error) {
+        console.error("Failed to fetch product:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchProduct();
   }, [id]);
 
   const openModal = () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    setQuantity(1); // reset quantity on open
+    if (!user) return navigate("/login");
+    setQuantity(1);
     setShowModal(true);
   };
 
@@ -71,44 +67,82 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (!product) return <p className="text-center mt-10">Product not found.</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-600">Loading...</p>;
+  if (!product)
+    return (
+      <p className="text-center mt-10 text-gray-600">Product not found.</p>
+    );
 
-  const imageUrl = `http://localhost:5000/${product.images?.[0].replace(/\\/g, "/")}`;
+  const imageUrl = `http://localhost:5000/${product.images?.[0].replace(
+    /\\/g,
+    "/"
+  )}`;
 
   return (
     <>
-      <div className={`max-w-xl mx-auto mt-10 p-4 border rounded shadow ${showModal ? "blur-sm" : ""}`}>
+      <div
+        className={`max-w-4xl mx-auto p-4 sm:p-6 md:p-8 mt-8 bg-white rounded-xl shadow-md ${
+          showModal ? "blur-sm" : ""
+        }`}
+      >
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          className="mb-4 text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded"
         >
-          &larr; Back
+          ← Back
         </button>
 
-        <img
-          src={imageUrl}
-          alt={product.name}
-          className="w-full h-64 object-cover rounded mb-4"
-        />
-        <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
-        <p className="text-gray-600 mb-1">Category: {product.category?.name}</p>
-        <p className="text-gray-800 font-semibold text-lg mb-2">₹{product.price}</p>
-        <p className="text-gray-600">{product.description}</p>
+        <div className="grid md:grid-cols-2 gap-6">
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-64 object-cover rounded-xl"
+          />
 
-        <button
-          onClick={openModal}
-          className="mt-6 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          Add to Cart
-        </button>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {product.name}
+            </h2>
+            <p className="text-sm text-gray-500 mb-1">
+              Category:{" "}
+              <span className="text-gray-700">{product.category?.name}</span>
+            </p>
+            <p className="text-lg text-blue-600 font-semibold mb-4">
+              ₹{product.price}
+            </p>
+            <p className="text-gray-600 mb-6">{product.description}</p>
+
+            <button
+              onClick={openModal}
+              className="w-full sm:w-auto px-6 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
+            >
+              Add to Cart
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Add to Cart</h2>
+        <div
+          className={`fixed inset-0 flex justify-center items-center z-50 px-4
+       bg-opacity-30 backdrop-blur-sm
+      transition-opacity duration-300
+      ${showModal ? "opacity-100" : "opacity-0"}
+    `}
+          onClick={closeModal} // close when clicking outside modal
+        >
+          <div
+            className={`bg-white w-full max-w-md rounded-xl shadow-xl p-6
+        transform transition-transform duration-300
+        ${showModal ? "opacity-100 scale-100" : "opacity-0 scale-95"}
+      `}
+            onClick={(e) => e.stopPropagation()} // prevent close on clicking inside modal
+          >
+            <h2 className="text-xl font-bold mb-4 text-blue-700">
+              Add to Cart
+            </h2>
             <div className="flex gap-4 mb-4">
               <img
                 src={imageUrl}
@@ -116,21 +150,23 @@ const ProductDetail = () => {
                 className="w-24 h-24 object-cover rounded"
               />
               <div>
-                <h3 className="font-semibold">{product.name}</h3>
-                <p className="text-gray-600">₹{product.price}</p>
-                <p className="text-sm mt-2">{product.description}</p>
+                <h3 className="text-md font-semibold">{product.name}</h3>
+                <p className="text-gray-600 text-sm">₹{product.price}</p>
+                <p className="text-xs text-gray-500 mt-2 line-clamp-3">
+                  {product.description}
+                </p>
               </div>
             </div>
 
-            <label className="block mb-2 font-medium">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Quantity:
               <input
                 type="number"
                 min={1}
-                max={product.qty || 1000} // fallback max if qty not provided
+                max={product.qty || 1000}
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
-                className="border rounded w-full mt-1 p-2"
+                className="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {product.qty !== undefined && (
                 <small className="text-gray-500">
@@ -139,18 +175,18 @@ const ProductDetail = () => {
               )}
             </label>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end mt-6 gap-3">
               <button
                 onClick={closeModal}
                 disabled={adding}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddToCart}
                 disabled={adding}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
               >
                 {adding ? "Adding..." : "Add"}
               </button>

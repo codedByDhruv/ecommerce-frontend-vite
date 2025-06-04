@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { LogOut } from "lucide-react";
 
 const getInitials = (email) => {
   return email ? email.slice(0, 2).toUpperCase() : "";
@@ -23,34 +24,40 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold">MyStore</Link>
-      <div className="space-x-4 flex items-center">
-        <Link to="/products">Products</Link>
+    <nav className="bg-white shadow-md px-4 py-3 flex justify-between items-center">
+      {/* Logo */}
+      <Link to="/" className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
+        MyStore
+      </Link>
 
+      {/* Navigation Links */}
+      <div className="flex items-center gap-4 text-sm md:text-base">
         {!user ? (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Signup</Link>
+            <Link to="/products" className="text-gray-700 hover:text-blue-600 transition">Products</Link>
+            <Link to="/login" className="text-gray-700 hover:text-blue-600 transition">Login</Link>
+            <Link to="/register" className="text-gray-700 hover:text-blue-600 transition">Signup</Link>
           </>
         ) : (
           <>
-            <Link to="/cart">Cart</Link>
-            <Link to="/orders">Orders</Link>
+            <Link to="/products" className="text-gray-700 hover:text-blue-600 transition hidden sm:inline">Products</Link>
+            <Link to="/cart" className="text-gray-700 hover:text-blue-600 transition hidden sm:inline">Cart</Link>
+            <Link to="/orders" className="text-gray-700 hover:text-blue-600 transition hidden sm:inline">Orders</Link>
+            {/* Avatar + Logout */}
             <div className="flex items-center gap-2">
               <div
-                className="rounded-full w-8 h-8 flex items-center justify-center text-white text-sm font-bold"
+                className="rounded-full w-9 h-9 flex items-center justify-center text-white text-sm font-bold shadow"
                 style={{ backgroundColor: getRandomColor(user.email) }}
                 title={user.email}
               >
                 {getInitials(user.email)}
               </div>
-              <span className="text-sm hidden sm:inline">{user.email}</span>
               <button
                 onClick={handleLogout}
-                className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                className="p-1 hover:bg-gray-100 rounded-full transition"
+                title="Logout"
               >
-                Logout
+                <LogOut className="w-5 h-5 text-red-500" />
               </button>
             </div>
           </>

@@ -11,7 +11,7 @@ const Layout = () => {
   return (
     <>
       {!hideHeaderFooter && <Navbar />}
-      <main className="min-h-screen p-4">
+      <main className="min-h-screen">
         <Outlet /> {/* This will render the current page */}
       </main>
       {!hideHeaderFooter && <Footer />}
