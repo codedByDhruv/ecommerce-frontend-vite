@@ -44,6 +44,27 @@ const Orders = () => {
     fetchOrders();
   }, [token, page]);
 
+  const handleCancelOrder = async (orderId) => {
+    const confirmCancel = window.confirm("Are you sure you want to cancel this order?");
+    if (!confirmCancel) return;
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/${orderId}/status`,
+        { status: "Cancelled" },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      fetchOrders();
+    } catch (err) {
+      console.error("Cancel failed:", err);
+      alert("Failed to cancel the order.");
+    }
+  };
+
   if (loading)
     return (
       <p className="text-center mt-10 text-lg text-gray-600">
@@ -75,6 +96,7 @@ const Orders = () => {
               <th className="p-3 text-left">Address</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Date</th>
+              <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white text-gray-800">
@@ -100,10 +122,14 @@ const Orders = () => {
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white ${
                       order.status === "Pending"
                         ? "bg-yellow-500"
+                        : order.status === "Processing"
+                        ? "bg-orange-500"
                         : order.status === "Shipped"
                         ? "bg-blue-600"
                         : order.status === "Delivered"
                         ? "bg-green-600"
+                        : order.status === "Cancelled"
+                        ? "bg-red-600"
                         : "bg-gray-500"
                     }`}
                   >
@@ -112,6 +138,16 @@ const Orders = () => {
                 </td>
                 <td className="p-3">
                   {new Date(order.createdAt).toLocaleDateString()}
+                </td>
+                <td className="p-3">
+                  {["Pending", "Processing"].includes(order.status) && (
+                    <button
+                      onClick={() => handleCancelOrder(order._id)}
+                      className="px-3 py-1 text-xs font-medium bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
